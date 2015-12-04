@@ -1,0 +1,31 @@
+{
+  "name": "leaflet-layer-control",
+  "version": "0.1.0",
+  "homepage": "https://github.com/Lemaf/leaflet-layer-control",
+  "description": "Leaflet Layer Control",
+  "main": "dist/leaflet-layer-control.js",
+  "moduleType": [],
+  "keywords": [
+    "leaflet",
+    "layers",
+    "control",
+    "plugin",
+    "control"
+  ],
+  "authors": [
+    "rthoth <ronaldo.silva@lemaf.ufla.br>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "src"
+  ],
+  "dependencies": {
+    "leaflet": "~0.7.7",
+    "web-animations-js": "~2.1.4"
+  }
+}
