@@ -21,9 +21,11 @@
 	<script type="text/javascript" src="llc.js"></script>
 	<script type="text/javascript">
 
-		var map, layerControl;
 
 		window.onload = function () {
+
+			var map, layerControl;
+
 			map = L.map('map', {
 				center: [-15.80064, -47.86164],
 				zoom: 16
@@ -46,6 +48,8 @@
 					groups: [{
 						name: 'Base Layer',
 						unique: true
+					},{
+						name: 'Brazil Secrets'
 					}, {
 						name: 'Brazil Ministries'
 					}]
@@ -67,6 +71,13 @@
 				}
 			);
 
+			var neverShow = L.polygon(
+				[], {
+					group: 'Brazil Secrets',
+					title: '#1 Secret!'
+				}
+			).addTo(map);
+
 			layerControl.addLegend([
 				{
 					layer: mctLayer,
@@ -82,6 +93,7 @@
 				.addLayer(mctLayer)
 				.addLayer(baseLayer2)
 				.addLayer(mecLayer)
+				.hideLayer(neverShow)
 				.updateAreas();
 
 			map.addControl(layerControl);

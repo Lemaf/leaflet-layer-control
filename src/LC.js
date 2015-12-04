@@ -40,6 +40,16 @@ L.Control.LC = L.Control.extend({
 		return this;
 	},
 
+	hideLayer: function (layer) {
+		this._toInvoke('hideLayer', layer);
+		return this;
+	},
+
+	showLayer: function (layer) {
+		this._toInvoke('showLayer', layer);
+		return this;
+	},
+
 	onAdd: function (map) {
 		this._viewLayers = L.Control.LC.viewLayers(map, this.options.layers);
 
@@ -52,6 +62,10 @@ L.Control.LC = L.Control.extend({
 			.on(button, 'mousedown', L.DomEvent.stop);
 
 		this._invokeInvokes();
+
+		this._map.eachLayer(function (layer) {
+			this._viewLayers.addLayer(layer, true);
+		}, this);
 
 		return button;
 	},

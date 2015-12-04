@@ -43,3 +43,5 @@ gulp.task('serve', ['uglify:javascript', 'less'], function () {
 		port: 8080
 	});
 });
+
+gulp.task('build', ['uglify:javascript', 'less']);

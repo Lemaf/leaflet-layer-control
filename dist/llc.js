@@ -40,6 +40,16 @@ L.Control.LC = L.Control.extend({
 		return this;
 	},
 
+	hideLayer: function (layer) {
+		this._toInvoke('hideLayer', layer);
+		return this;
+	},
+
+	showLayer: function (layer) {
+		this._toInvoke('showLayer', layer);
+		return this;
+	},
+
 	onAdd: function (map) {
 		this._viewLayers = L.Control.LC.viewLayers(map, this.options.layers);
 
@@ -52,6 +62,10 @@ L.Control.LC = L.Control.extend({
 			.on(button, 'mousedown', L.DomEvent.stop);
 
 		this._invokeInvokes();
+
+		this._map.eachLayer(function (layer) {
+			this._viewLayers.addLayer(layer, true);
+		}, this);
 
 		return button;
 	},
@@ -189,13 +203,15 @@ L.Control.LC.ViewLayers = L.Class.extend({
 			.on(closeEl, 'click', this._onCloseClick, this);
 
 		this._layers = {};
-
-		this._map.eachLayer(function (layer) {
-			this.addLayer(layer, true);
-		}, this);
+		this._hidedLayers = [];
 	},
 
 	addLayer: function (layer, auto) {
+
+		if (!layer.options) {
+			return;
+		}
+
 		var id = L.stamp(layer);
 
 		if (!this._layers[id]) {
@@ -204,8 +220,14 @@ L.Control.LC.ViewLayers = L.Class.extend({
 				layer: layer
 			};
 
+			var showLayer = this._hidedLayers.indexOf(id) === -1;
+
 			var group = this._getGroup(layer.options.group);
-			var liEl = L.DomUtil.create('li', 'llc-item', group.el);
+			if (!showLayer) {
+				this._maybeShow(group);
+			}
+
+			var liEl = L.DomUtil.create('li', 'llc-item', showLayer && group.el);
 
 			var legendEl = L.DomUtil.create('div', 'llc-item-legend', liEl);
 
@@ -290,6 +312,25 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		}
 	},
 
+	hideLayer: function (layer) {
+
+		var layerID = L.stamp(layer);
+
+		if (this._hidedLayers.indexOf(layerID) === -1) {
+			this._hidedLayers.push(layerID);
+		}
+
+		var layerInfo;
+		if ((layerInfo = this._layers[layerID])) {
+			if (layerInfo.liEl.parentNode) {
+				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
+
+				this._maybeShow(layerInfo.group);
+			}
+		}
+
+	},
+
 	removeLayer: function (layer, remove) {
 		var id = L.stamp(layer);
 		var layerInfo = this._layers[id];
@@ -330,6 +371,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 
 		if (!this._groups) {
 			this._groups = {};
+			this._groupsOrder = [];
 		}
 
 		if (this._groups[group.name]) {
@@ -341,6 +383,8 @@ L.Control.LC.ViewLayers = L.Class.extend({
 			unique: !!group.unique,
 			el: L.DomUtil.create('ul', 'llc-group', this._groupsRootEl)
 		};
+
+		this._groupsOrder.push(groupObj);
 
 		var li = L.DomUtil.create('li', 'llc-group-title', groupObj.el);
 		var spanTitle = L.DomUtil.create('span', null, li);
@@ -369,6 +413,12 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		}
 
 		return group;
+	},
+
+	_maybeShow: function (group) {
+		if (!group.showAlways && group.el.childNodes.length === 1) {
+			group.el.parentNode.removeChild(group.el);
+		}
 	},
 
 	_onCloseClick: function (event) {
