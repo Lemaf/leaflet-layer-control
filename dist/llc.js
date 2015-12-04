@@ -224,7 +224,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 
 			var group = this._getGroup(layer.options.group);
 			if (!showLayer) {
-				this._maybeShow(group);
+				this._maybeHideGroup(group);
 			}
 
 			var liEl = L.DomUtil.create('li', 'llc-item', showLayer && group.el);
@@ -286,6 +286,9 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		}
 
 		this._layers[id].inMap = this._map.hasLayer(layer);
+		if (this._layers[id].inMap) {
+			this._layers[id].visibilityCheckEl.checked = true;
+		}
 
 		return this;
 	},
@@ -325,7 +328,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 			if (layerInfo.liEl.parentNode) {
 				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
 
-				this._maybeShow(layerInfo.group);
+				this._maybeHideGroup(layerInfo.group);
 			}
 		}
 
@@ -415,7 +418,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		return group;
 	},
 
-	_maybeShow: function (group) {
+	_maybeHideGroup: function (group) {
 		if (!group.showAlways && group.el.childNodes.length === 1) {
 			group.el.parentNode.removeChild(group.el);
 		}

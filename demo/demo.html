@@ -34,7 +34,7 @@
 			var baseLayer1 = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 				group: 'Base Layer',
 				title: 'OSM Layer'
-			});
+			}).addTo(map);
 
 			var baseLayer2 = L.tileLayer('http://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png', {
 				group: 'Base Layer',
@@ -69,7 +69,7 @@
 					group: 'Brazil Ministries',
 					title: 'MEC'
 				}
-			);
+			).addTo(map);
 
 			var neverShow = L.polygon(
 				[], {
