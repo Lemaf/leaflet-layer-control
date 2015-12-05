@@ -8,6 +8,9 @@ L.llc.Control = L.Control.extend({
 	options: {
 		position: 'bottomright',
 		layers: {
+
+			animationTime: 500,
+
 			showAreas: true,
 
 			formatArea: function (area) {

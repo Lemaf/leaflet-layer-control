@@ -82,12 +82,62 @@ L.llc.View = L.Class.extend({
 	},
 
 	_close: function () {
-		delete this._visible;
 
 		// TODO: Anim
 		
-		this._containerEl.parentNode.removeChild(this._containerEl);
-		this._fromEl.style.display = 'block';
+		// this._containerEl.parentNode.removeChild(this._containerEl);
+		// this._fromEl.style.display = 'block';
+
+		var containerEl = this._containerEl,
+		    fromEl = this._fromEl,
+		    canvasEl = this._canvasEl;
+
+		L.extend(this._fromEl.style, {
+			opacity: 0,
+			display: 'block'
+		});
+
+		var player = canvasEl.animate([
+			{opacity: 1}, {opacity: 0}
+		], this.options.animationTime / 2);
+
+		L.DomEvent.on(player, 'finish', function () {
+			canvasEl.style.display = 'none';
+		});
+
+		player = containerEl.animate([
+			{
+				height: containerEl.offsetHeight + 'px',
+				width: containerEl.offsetWidth + 'px',
+				opacity: 1
+			}, {
+				height: fromEl.offsetHeight + 'px',
+				width: fromEl.offsetWidth + 'px',
+				opacity: 0,
+				easing: 'ease-in-out'
+			}
+		], this.options.animationTime);
+
+		L.DomEvent.on(player, 'finish', function () {
+			containerEl.parentNode.removeChild(containerEl);
+		});
+
+		player = fromEl.animate([
+			{
+				opacity: 0
+			},
+			{
+				opacity: 1
+			}
+		], this.options.animationTime);
+
+		L.DomEvent.on(player, 'finish', function () {
+				delete this._visible;
+				L.extend(fromEl.style, {
+					display: 'block',
+					opacity: ''
+				});
+			}, this);
 	},
 
 	_onCloseClick: function () {
@@ -108,6 +158,7 @@ L.llc.View = L.Class.extend({
 	_show: function (fromEl, position) {
 
 		L.extend(this._canvasEl.style, {
+			display: 'block',
 			opacity: 0
 		});
 
@@ -134,21 +185,20 @@ L.llc.View = L.Class.extend({
 		}, this._cssPosition);
 
 		fromEl.parentNode.appendChild(this._containerEl);
-		fromEl.style.display = 'none';
 		this._fromEl = fromEl;
-
-		this._containerEl.style.background = '#ffffff';
 
 		var player = this._containerEl.animate([
 			{
 				height: fromEl.offsetHeight + 'px',
-				width: fromEl.offsetWidth + 'px'
+				width: fromEl.offsetWidth + 'px',
+				opacity: 0
 			}, {
 				height: this._containerEl.scrollHeight + 'px',
 				width: this._containerEl.scrollWidth + 'px',
+				opacity: 1,
 				easing: 'ease-in-out'
 			}
-		], 500);
+		], this.options.animationTime / 2);
 
 		L.DomEvent
 			.on(player, 'finish', function () {
@@ -161,7 +211,7 @@ L.llc.View = L.Class.extend({
 		player = this._canvasEl.animate([
 			{opacity: 0},
 			{opacity: 1}
-		], 500);
+		], this.options.animationTime);
 
 		L.DomEvent
 			.on(player, 'finish', function () {
@@ -169,6 +219,15 @@ L.llc.View = L.Class.extend({
 					opacity: 1
 				});
 			}, this);
+
+
+		player = fromEl.animate([
+			{opacity: 1}, {opacity: 0}
+		], this.options.animationTime);
+
+		L.DomEvent.on(player, 'finish', function () {
+			fromEl.style.display = 'none';
+		});
 	}
 });
 
