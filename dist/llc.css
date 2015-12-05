@@ -83,6 +83,7 @@
 }
 .llc-container .llc-item .llc-item-opacity {
   width: 7em;
+  margin-left: 1em;
 }
 .llc-container .llc-item .llc-item-opacity:checked + label {
   background-color: #000;

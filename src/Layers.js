@@ -106,6 +106,7 @@ L.llc.Layers = L.Class.extend({
 				opacityEl.type = 'range';
 				opacityEl.min = 0;
 				opacityEl.max = 100;
+				opacityEl.value = 100;
 				opacityEl._layerID = layerID;
 				layerInfo.opacityEl = opacityEl;
 
