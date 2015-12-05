@@ -42,20 +42,6 @@
 				subdomains: 'abc'
 			});
 
-			layerControl = L.Control.lc({
-				position: 'topright',
-				layers: {
-					groups: [{
-						name: 'Base Layer',
-						unique: true
-					},{
-						name: 'Brazil Secrets'
-					}, {
-						name: 'Brazil Ministries'
-					}]
-				}
-			});
-
 
 			var mctLayer = L.polygon(
 				[[-15.79894868207,-47.870412149013],[-15.79887851051,-47.870345852206],[-15.79908264588,-47.86971603253],[-15.79923255766,-47.869706088012],[-15.80032340174,-47.870064090773],[-15.80011607802,-47.870790040817],[-15.79894868207,-47.870412149013]], {
@@ -78,20 +64,33 @@
 				}
 			).addTo(map);
 
-			layerControl.addLegend([
-				{
-					layer: mctLayer,
-					style: {
-						border: '1px solid #0f0',
-						background: 'none'
-					}
+			layerControl = L.Control.lc({
+				position: 'topright',
+				layers: {
+					groups: [{
+						name: 'Base Layer',
+						unique: true
+					},{
+						name: 'Brazil Secrets'
+					}, {
+						name: 'Brazil Ministries'
+					}]
 				}
-			]);
+			});
+
+			// layerControl.addLegend([
+			// 	{
+			// 		layer: mctLayer,
+			// 		style: {
+			// 			border: '1px solid #0f0',
+			// 			background: 'none'
+			// 		}
+			// 	}
+			// ]);
 
 			layerControl
-				.addLayer(baseLayer1)
-				.addLayer(mctLayer)
 				.addLayer(baseLayer2)
+				.addLayer(mctLayer)
 				.addLayer(mecLayer)
 				.hideLayer(neverShow)
 				.updateAreas();

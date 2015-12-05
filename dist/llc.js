@@ -1,116 +1,5 @@
-L.Control.LC = L.Control.extend({
+L.llc = {
 
-	includes: L.Mixin.Events,
-
-	options: {
-		position: 'bottomright',
-		layers: {
-			showAreas: true,
-
-			formatArea: function (area) {
-				if (area >= 1000) {
-					return L.Util.formatNum(area / 1e4, 4) + 'ha';
-				} else {
-					return L.Util.formatNum(area, 4) + 'm';
-				}
-			},
-
-			groups: []
-		},
-		parentElement: null
-	},
-
-	initialize: function (options) {
-		var layerOptions = L.extend({}, this.options.layers, options && options.layers);
-
-		options = L.extend({}, this.options, options || {}, {
-			layers: layerOptions
-		});
-
-		L.Control.prototype.initialize.call(this, options);
-	},
-
-	addLayer: function (layer) {
-		this._toInvoke('addLayer', layer);
-		return this;
-	},
-
-	addLegend: function (legend) {
-		this._toInvoke('addLegend', legend);
-		return this;
-	},
-
-	hideLayer: function (layer) {
-		this._toInvoke('hideLayer', layer);
-		return this;
-	},
-
-	showLayer: function (layer) {
-		this._toInvoke('showLayer', layer);
-		return this;
-	},
-
-	onAdd: function (map) {
-		this._viewLayers = L.Control.LC.viewLayers(map, this.options.layers);
-
-		var button = L.DomUtil.create('div', 'llc llc-button');
-
-		L.DomEvent
-			.on(button, 'click', this._onButtonClick, this)
-			.on(button, 'click', L.DomEvent.stop)
-			.on(button, 'dblclick', L.DomEvent.stop)
-			.on(button, 'mousedown', L.DomEvent.stop);
-
-		this._invokeInvokes();
-
-		this._map.eachLayer(function (layer) {
-			this._viewLayers.addLayer(layer, true);
-		}, this);
-
-		return button;
-	},
-
-	updateAreas: function () {
-		this._toInvoke('updateAreas');
-		return this;
-	},
-
-	_invokeInvoke: function (invoke) {
-		if (this._viewLayers) {
-			this._viewLayers[invoke.method].apply(this._viewLayers, invoke.args);
-		}
-	},
-
-	_invokeInvokes: function() {
-		if (this._invokes) {
-			for (var i=0; i < this._invokes.length; i++) {
-				this._invokeInvoke(this._invokes[i]);
-			}
-		}
-	},
-
-	_onButtonClick: function () {
-		var position = this.getPosition();
-		this._viewLayers.show(this._container, this.getPosition());
-	},
-
-	_toInvoke: function (method) {
-		var args = Array.prototype.slice.call(arguments, 1);
-
-		if (!this._invokes) {
-			this._invokes = [];
-		}
-
-		var invoke = {method: method, args: args};
-		this._invokes.push(invoke);
-
-		this._invokeInvoke(invoke);
-	}
-
-});
-
-L.Control.lc = function (options) {
-	return new L.Control.LC(options);
 };
 
 
@@ -141,12 +30,12 @@ L.Control.lc = function (options) {
 	}
 
 
-	L.Control.LC.areaOf = function (layer, format) {
+	L.llc.areaOf = function (layer) {
 		var area = 0;
 		if (layer instanceof L.FeatureGroup) {
 
 			layer.eachLayer(function (layer) {
-				area += L.Control.LC.areaOf(layer);
+				area += L.llc.Control.areaOf(layer);
 			});
 		} else if (layer instanceof L.Polygon) {
 			var latlngs = layer.getLatLngs();
@@ -167,7 +56,251 @@ L.Control.lc = function (options) {
 
 })();
 
-L.Control.LC.ViewLayers = L.Class.extend({
+L.llc.Layers = L.Class.extend({
+
+	includes: L.Mixin.Events,
+
+	options: {
+
+	},
+
+	initialize: function (rootEl, map, options) {
+		L.setOptions(this, options);
+
+		this._rootEl = rootEl;
+		this._map = map;
+
+		this._groups = {};
+		this._groupsOrder = [];
+
+		this._layers = {};
+		this._hidedLayers = [];
+
+		map
+			.on('layeradd', this._onLayerAdd, this)
+			.on('layerremove', this._onLayerRemove, this);
+	},
+
+	addGroup: function (group) {
+
+		if (this._groups[group.name]) {
+			return;
+		}
+
+		var groupInfo = this._groups[group.name] = {
+			name: group.name,
+			unique: !!group.unique,
+			el: L.DomUtil.create('ul', 'llc-group', this._rootEl)
+		};
+
+		this._groupsOrder.push(groupInfo);
+
+		var li = L.DomUtil.create('li', 'llc-group-title', groupInfo.el);
+		var spanTitle = L.DomUtil.create('span', null, li);
+		spanTitle.innerHTML = group.name;
+
+		return this;
+	},
+
+	addLayer: function (layer, auto) {
+
+		if (!layer.options) {
+			return this;
+		}
+
+		var layerID = L.stamp(layer);
+		var layerInfo = this._layers[layerID];
+
+		if (!layerInfo) {
+
+			layerInfo = this._layers[layerID] = {
+				layer: layer
+			};
+
+			var showLayer = this._hidedLayers.indexOf(layerID) === -1;
+
+			var group = this._getGroup(layer.options.group);
+
+			if (!showLayer) {
+				this._maybeHideGroup(group);
+			}
+
+			var liEl = L.DomUtil.create('li', 'llc-item', showLayer && group.el);
+
+			var legendEl = L.DomUtil.create('div', 'llc-item-legend', liEl);
+
+			var visibilityCheckEl = L.DomUtil.create('input', 'llc-item-visibility', liEl);
+			var labelVisibilityEl = L.DomUtil.create('label', 'llc-item-opacity-label', liEl);
+			visibilityCheckEl.id = 'llc-' + L.stamp(visibilityCheckEl);
+			labelVisibilityEl.setAttribute('for', visibilityCheckEl.id);
+
+			// var span = L.DomUtil.create('span', 'llc-item-title', liEl);
+			// span.innerHTML = layer.options.title;
+			
+			labelVisibilityEl.innerHTML = layer.options.title;
+
+			liEl._layerID = layerID;
+			layerInfo.group = group;
+			layerInfo.liEl = liEl;
+			layerInfo.legendEl = legendEl;
+			layerInfo.visibilityCheckEl = visibilityCheckEl;
+
+
+			visibilityCheckEl._layerID = layerID;
+
+			if (group.unique) {
+				visibilityCheckEl.type = 'radio';
+				visibilityCheckEl.name = group.name;
+			} else {
+				visibilityCheckEl.type = 'checkbox';
+			}
+
+			L.DomEvent
+				.on(visibilityCheckEl, 'click', this._onVisibilityClick, this);
+
+			if (layer.setOpacity) {
+				var opacityEl = L.DomUtil.create('input', 'llc-item-opacity', liEl);
+				opacityEl.type = 'range';
+				opacityEl.min = 0;
+				opacityEl.max = 100;
+				opacityEl._layerID = layerID;
+				layerInfo.opacityEl = opacityEl;
+
+				L.DomEvent
+					.on(opacityEl, 'change', this._onOpacityChange, this);
+			}
+
+			if (this.options.showAreas) {
+				if (layer instanceof L.Polygon || layer instanceof L.FeatureGroup) {
+					var areaEl = L.DomUtil.create('span', 'llc-item-area', liEl);
+					layerInfo.areaEl = areaEl;
+				}
+			}
+		}
+
+		if (!auto) {
+			this._layers[layerID].user = true;
+		}
+
+		this._layers[layerID].inMap = this._map.hasLayer(layer);
+		if (this._layers[layerID].inMap) {
+			this._layers[layerID].visibilityCheckEl.checked = true;
+		}
+
+		return this;
+	},
+
+	hideLayer: function (layer) {
+		var layerID = L.stamp(layer);
+
+		if (this._hidedLayers.indexOf(layerID) === -1) {
+			this._hidedLayers.push(layerID);
+		}
+
+		var layerInfo;
+		if ((layerInfo = this._layers[layerID])) {
+			if (layerInfo.liEl.parentNode) {
+				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
+
+				this._maybeHideGroup(layerInfo.group);
+			}
+		}
+
+		return this;
+	},
+
+	removeLayer: function (layer, auto) {
+		var layerID = L.stamp(layer);
+		var layerInfo = this._layers[layerID];
+
+		if (layerInfo) {
+
+			delete layerInfo.inMap;
+			layerInfo.visibilityCheckEl.checkbox = !!layerInfo.inMap;
+
+			if (!auto) {
+				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
+				delete this._layers[layerID];
+			}
+		}
+
+	},
+
+	_maybeHideGroup: function (group) {
+		if (!group.showAlways && group.el.childNodes.length === 1) {
+			group.el.parentNode.removeChild(group.el);
+		}
+	},
+
+	_getGroup: function (groupName) {
+		var group = this._groups[groupName];
+
+		if (!group) {
+			// TODO: What?
+			this._addGroup({name: 'default'});
+			group = this._groups['default'];
+		}
+
+		return group;
+	},
+
+	_onLayerAdd: function (evt) {
+		this.addLayer(evt.layer, true);
+	},
+
+	_onLayerRemove: function (evt) {
+		this.removeLayer(evt.layer, true);
+	},
+
+	_onOpacityChange: function (event) {
+		var opacity = parseInt(event.currentTarget.value) / 100;
+		var layerInfo = this._layers[event.currentTarget._layerID];
+
+		if (layerInfo) {
+			layerInfo.layer.setOpacity(opacity);
+		}
+	},
+
+	_onVisibilityClick: function (event) {
+
+		var layerInfo = this._layers[event.currentTarget._layerID];
+		if (layerInfo) {
+
+			var group = layerInfo.group, otherLayerInfo;
+
+			if (group.unique) {
+
+				if (layerInfo.inMap) {
+					return;
+				}
+
+				for (var layerID in this._layers) {
+					otherLayerInfo = this._layers[layerID];
+
+					if (otherLayerInfo !== layerInfo && otherLayerInfo.group === group) {
+						if (otherLayerInfo.inMap) {
+							this._map.removeLayer(otherLayerInfo.layer);
+						}
+					}
+				}
+
+				this._map.addLayer(layerInfo.layer);
+
+			} else {
+				if (layerInfo.inMap) {
+					this._map.removeLayer(layerInfo.layer);
+				} else {
+					this._map.addLayer(layerInfo.layer);
+				}
+			}
+		}
+	},
+});
+
+/**
+ * @requires Layers.js
+ */
+L.llc.View = L.Class.extend({
 
 	includes: L.Mixin.Events,
 
@@ -187,19 +320,19 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		var closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close', headerEl);
 
 		this._groupsRootEl = L.DomUtil.create('div', 'llc-groups', canvasEl);
+		this._fragments = {
+			layers: new L.llc.Layers(this._groupsRootEl, map)
+		};
 
 		if (this.options.groups) {
 			this.options.groups.forEach(this._addGroup, this);
 		}
 
-		map
-			.on('layeradd', this._onLayerAdd, this)
-			.on('layerremove', this._onLayerRemove, this);
-
 		L.DomEvent
 			.on(containerEl, 'click', L.DomEvent.stopPropagation)
 			.on(containerEl, 'dblclick', L.DomEvent.stopPropagation)
 			.on(containerEl, 'mousedown', L.DomEvent.stopPropagation)
+			.on(containerEl, 'wheel', L.DomEvent.stopPropagation)
 			.on(closeEl, 'click', this._onCloseClick, this);
 
 		this._layers = {};
@@ -207,89 +340,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 	},
 
 	addLayer: function (layer, auto) {
-
-		if (!layer.options) {
-			return;
-		}
-
-		var id = L.stamp(layer);
-
-		if (!this._layers[id]) {
-
-			var layerInfo = this._layers[id] = {
-				layer: layer
-			};
-
-			var showLayer = this._hidedLayers.indexOf(id) === -1;
-
-			var group = this._getGroup(layer.options.group);
-			if (!showLayer) {
-				this._maybeHideGroup(group);
-			}
-
-			var liEl = L.DomUtil.create('li', 'llc-item', showLayer && group.el);
-
-			var legendEl = L.DomUtil.create('div', 'llc-item-legend', liEl);
-
-			var visibilityCheckEl = L.DomUtil.create('input', 'llc-item-visibility', liEl);
-			var labelVisibilityEl = L.DomUtil.create('label', 'llc-item-opacity-label', liEl);
-			visibilityCheckEl.id = 'llc-' + L.stamp(visibilityCheckEl);
-			labelVisibilityEl.setAttribute('for', visibilityCheckEl.id);
-
-			// var span = L.DomUtil.create('span', 'llc-item-title', liEl);
-			// span.innerHTML = layer.options.title;
-			
-			labelVisibilityEl.innerHTML = layer.options.title;
-
-			liEl._layerID = id;
-			layerInfo.group = group;
-			layerInfo.liEl = liEl;
-			layerInfo.legendEl = legendEl;
-			layerInfo.visibilityCheckEl = visibilityCheckEl;
-
-
-			visibilityCheckEl._layerID = id;
-
-			if (group.unique) {
-				visibilityCheckEl.type = 'radio';
-				visibilityCheckEl.name = group.name;
-			} else {
-				visibilityCheckEl.type = 'checkbox';
-			}
-
-			L.DomEvent
-				.on(liEl, 'click', this._onItemClick, this)
-				.on(visibilityCheckEl, 'click', this._onItemVisibilityCheck, this);
-
-			if (layer.setOpacity) {
-				var opacityEl = L.DomUtil.create('input', 'llc-item-opacity', liEl);
-				opacityEl.type = 'range';
-				opacityEl.min = 0;
-				opacityEl.max = 100;
-				opacityEl._layerID = id;
-				layerInfo.opacityEl = opacityEl;
-
-				L.DomEvent
-					.on(opacityEl, 'change', this._onOpacityChange, this);
-			}
-
-			if (this.options.showAreas) {
-				if (layer instanceof L.Polygon || layer instanceof L.FeatureGroup) {
-					var areaEl = L.DomUtil.create('span', 'llc-item-area', liEl);
-					layerInfo.areaEl = areaEl;
-				}
-			}
-		}
-
-		if (!auto) {
-			this._layers[id].user = true;
-		}
-
-		this._layers[id].inMap = this._map.hasLayer(layer);
-		if (this._layers[id].inMap) {
-			this._layers[id].visibilityCheckEl.checked = true;
-		}
-
+		this._fragments.layers.addLayer(layer, auto);
 		return this;
 	},
 
@@ -316,38 +367,8 @@ L.Control.LC.ViewLayers = L.Class.extend({
 	},
 
 	hideLayer: function (layer) {
-
-		var layerID = L.stamp(layer);
-
-		if (this._hidedLayers.indexOf(layerID) === -1) {
-			this._hidedLayers.push(layerID);
-		}
-
-		var layerInfo;
-		if ((layerInfo = this._layers[layerID])) {
-			if (layerInfo.liEl.parentNode) {
-				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
-
-				this._maybeHideGroup(layerInfo.group);
-			}
-		}
-
-	},
-
-	removeLayer: function (layer, remove) {
-		var id = L.stamp(layer);
-		var layerInfo = this._layers[id];
-
-		if (layerInfo) {
-
-			delete layerInfo.inMap;
-
-			if (remove) {
-				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
-				delete this._layers[id];
-			}
-		}
-
+		this._fragments.layers.hideLayer(layer);
+		return this;
 	},
 
 	show: function (fromEl, position) {
@@ -359,7 +380,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 	},
 
 	updateAreas: function () {
-		var layerInfo, area;
+		var layerInfo;
 
 		for (var id in this._layers) {
 			layerInfo = this._layers[id];
@@ -371,28 +392,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 	},
 
 	_addGroup: function (group) {
-
-		if (!this._groups) {
-			this._groups = {};
-			this._groupsOrder = [];
-		}
-
-		if (this._groups[group.name]) {
-			return;
-		}
-
-		var groupObj = this._groups[group.name] = {
-			name: group.name,
-			unique: !!group.unique,
-			el: L.DomUtil.create('ul', 'llc-group', this._groupsRootEl)
-		};
-
-		this._groupsOrder.push(groupObj);
-
-		var li = L.DomUtil.create('li', 'llc-group-title', groupObj.el);
-		var spanTitle = L.DomUtil.create('span', null, li);
-
-		spanTitle.innerHTML = group.name;
+		this._fragments.layers.addGroup(group);
 	},
 
 	_close: function () {
@@ -404,27 +404,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		this._fromEl.style.display = 'block';
 	},
 
-	_getGroup: function (groupName) {
-		if (!this._groups) {
-			this._groups = {};
-		}
-
-		var group = this._groups[groupName];
-		if (!group) {
-			this._addGroup({name: 'default'});
-			group = this._groups['default'];
-		}
-
-		return group;
-	},
-
-	_maybeHideGroup: function (group) {
-		if (!group.showAlways && group.el.childNodes.length === 1) {
-			group.el.parentNode.removeChild(group.el);
-		}
-	},
-
-	_onCloseClick: function (event) {
+	_onCloseClick: function () {
 		this.close();
 	},
 
@@ -436,51 +416,7 @@ L.Control.LC.ViewLayers = L.Class.extend({
 		this.removeLayer(evt.layer);
 	},
 
-	_onItemClick: function (evt) {
-	},
-
-	_onItemVisibilityCheck: function (event) {
-
-		var layerInfo = this._layers[event.currentTarget._layerID];
-		if (layerInfo) {
-
-			var group = layerInfo.group, otherLayerInfo;
-
-			if (group.unique) {
-
-				if (layerInfo.inMap) {
-					return;
-				}
-
-				for (var id in this._layers) {
-					otherLayerInfo = this._layers[id];
-
-					if (otherLayerInfo !== layerInfo && otherLayerInfo.group === group) {
-						if (otherLayerInfo.inMap) {
-							this._map.removeLayer(otherLayerInfo.layer);
-						}
-					}
-				}
-
-				this._map.addLayer(layerInfo.layer);
-
-			} else {
-				if (layerInfo.inMap) {
-					this._map.removeLayer(layerInfo.layer);
-				} else {
-					this._map.addLayer(layerInfo.layer);
-				}
-			}
-		}
-	},
-
-	_onOpacityChange: function (event) {
-		var opacity = parseInt(event.target.value) / 100;
-		var layerInfo = this._layers[event.target._layerID];
-
-		if (layerInfo) {
-			layerInfo.layer.setOpacity(opacity);
-		}
+	_onItemClick: function () {
 	},
 
 	_show: function (fromEl, position) {
@@ -550,6 +486,125 @@ L.Control.LC.ViewLayers = L.Class.extend({
 	}
 });
 
-L.Control.LC.viewLayers = function (map, options) {
-	return new L.Control.LC.ViewLayers(map, options);
+L.llc.view = function (map, options) {
+	return new L.llc.View(map, options);
 };
+
+
+/**
+ * @requires View.js
+ */
+L.llc.Control = L.Control.extend({
+
+	includes: L.Mixin.Events,
+
+	options: {
+		position: 'bottomright',
+		layers: {
+			showAreas: true,
+
+			formatArea: function (area) {
+				if (area >= 1000) {
+					return L.Util.formatNum(area / 1e4, 4) + 'ha';
+				} else {
+					return L.Util.formatNum(area, 4) + 'm';
+				}
+			},
+
+			groups: []
+		},
+		parentElement: null
+	},
+
+	initialize: function (options) {
+		var layerOptions = L.extend({}, this.options.layers, options && options.layers);
+
+		options = L.extend({}, this.options, options || {}, {
+			layers: layerOptions
+		});
+
+		L.Control.prototype.initialize.call(this, options);
+	},
+
+	addLayer: function (layer) {
+		this._toInvoke('addLayer', layer);
+		return this;
+	},
+
+	addLegend: function (legend) {
+		this._toInvoke('addLegend', legend);
+		return this;
+	},
+
+	hideLayer: function (layer) {
+		this._toInvoke('hideLayer', layer);
+		return this;
+	},
+
+	showLayer: function (layer) {
+		this._toInvoke('showLayer', layer);
+		return this;
+	},
+
+	onAdd: function (map) {
+		this._viewLayers = L.llc.view(map, this.options.layers);
+
+		var button = L.DomUtil.create('div', 'llc llc-button');
+
+		L.DomEvent
+			.on(button, 'click', this._onButtonClick, this)
+			.on(button, 'click', L.DomEvent.stop)
+			.on(button, 'dblclick', L.DomEvent.stop)
+			.on(button, 'mousedown', L.DomEvent.stop);
+
+		this._invokeInvokes();
+
+		this._map.eachLayer(function (layer) {
+			this._viewLayers.addLayer(layer, true);
+		}, this);
+
+		return button;
+	},
+
+	updateAreas: function () {
+		this._toInvoke('updateAreas');
+		return this;
+	},
+
+	_invokeInvoke: function (invoke) {
+		if (this._viewLayers) {
+			this._viewLayers[invoke.method].apply(this._viewLayers, invoke.args);
+		}
+	},
+
+	_invokeInvokes: function() {
+		if (this._invokes) {
+			for (var i=0; i < this._invokes.length; i++) {
+				this._invokeInvoke(this._invokes[i]);
+			}
+		}
+	},
+
+	_onButtonClick: function () {
+		this._viewLayers.show(this._container, this.getPosition());
+	},
+
+	_toInvoke: function (method) {
+		var args = Array.prototype.slice.call(arguments, 1);
+
+		if (!this._invokes) {
+			this._invokes = [];
+		}
+
+		var invoke = {method: method, args: args};
+		this._invokes.push(invoke);
+
+		this._invokeInvoke(invoke);
+	}
+
+});
+
+L.Control.lc = function (options) {
+	return new L.llc.Control(options);
+};
+//# sourceMappingURL=llc.js.map
