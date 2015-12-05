@@ -136,7 +136,7 @@
 			pointer-events: none;
 			top: 0px;
 			font-size: 3em;
-			transition: transform .2s, opacity .2s;
+			transition: transform .25s, opacity .25s;
 		}
 
 		&:checked + label:after {
@@ -146,7 +146,7 @@
 
 		&:not(:checked) + label:after {
 			opacity: 0;
-			transform: scale(2);
+			transform: scale(3);
 		}
 	}
 
@@ -160,10 +160,11 @@
 			position: relative;
 		}
 
-		&:checked + label:before, & + label:before, & + label:after {
+		& + label:before, &:checked + label:after, &:not(:checked) + label:after {
 			content: '';
 			position: absolute;
 			display: block;
+			pointer-events: none;
 		}
 
 		& + label:before {
@@ -176,13 +177,24 @@
 			left: 0.25em;
 		}
 
-		&:checked + label:after {
+		&:checked + label:after, &:not(:checked) + label:after {
 			background-color: #078000;
 			border-radius: 1em;
 			height: 0.7em;
 			left: 0.65em;
 			width: 0.7em;
 			top: 0.65em;
+			transition: transform .25s, opacity .25s;
+		}
+
+		&:checked + label:after {
+			opacity: 1;
+			transform: scale(1);
+		}
+
+		&:not(:checked) + label:after {
+			opacity: 0;
+			transform: scale(3);
 		}
 	}
 
