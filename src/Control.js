@@ -38,8 +38,8 @@ L.llc.Control = L.Control.extend({
 		return this;
 	},
 
-	addLegend: function (legend) {
-		this._toInvoke('addLegend', legend);
+	addLegend: function (layer, legend) {
+		this._toInvoke('addLegend', layer, legend);
 		return this;
 	},
 

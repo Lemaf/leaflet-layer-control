@@ -124,12 +124,29 @@ L.llc.Layers = L.Class.extend({
 			this._layers[layerID].user = true;
 		}
 
+		if (layer.options.legend) {
+			L.extend(layerInfo.legendEl.style, layer.options.legend);
+		}
+
 		this._layers[layerID].inMap = this._map.hasLayer(layer);
 		if (this._layers[layerID].inMap) {
 			this._layers[layerID].visibilityCheckEl.checked = true;
 		}
 
 		return this;
+	},
+
+	addLegend: function (layer, legend) {
+		var layerInfo = this._layers[L.stamp(layer)];
+
+		if (!layerInfo) {
+			this.addLayer(layer);
+			layerInfo = this._layers[L.stamp(layer)];
+		}
+
+		if (layerInfo) {
+			L.extend(layerInfo.legendEl.style, legend);
+		}
 	},
 
 	hideLayer: function (layer) {
@@ -166,6 +183,19 @@ L.llc.Layers = L.Class.extend({
 			}
 		}
 
+	},
+
+	updateAreas: function () {
+		var layerInfo;
+		if (this.options.showAreas) {
+			for (var layerID in this._layers) {
+				layerInfo = this._layers[layerID];
+
+				if (layerInfo.areaEl) {
+					layerInfo.areaEl.textContent = this.options.formatArea(L.llc.areaOf(layerInfo.layer));
+				}
+			}
+		}
 	},
 
 	_maybeHideGroup: function (group) {

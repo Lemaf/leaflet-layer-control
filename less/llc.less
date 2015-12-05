@@ -1,8 +1,7 @@
 .llc-button {
 	background: #fff;
-	border: 1px solid #808080;
 	border-radius: 4px;
-	box-shadow: 1px 1px 5px #808080;
+	box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.65);
 	height: 32px;
 	width: 32px;
 
@@ -17,7 +16,8 @@
 }
 
 .llc-container {
-	box-shadow: 2px 2px 20px rgba(128, 128, 128, 0.5);
+	border-radius: 4px;
+	box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.65);
 	cursor: pointer;
 	padding: 0.5em;
 	pointer-events: auto;
@@ -33,7 +33,6 @@
 		li {
 			padding: 0.5em;
 			list-style: none;
-
 		}
 	}
 
@@ -48,8 +47,16 @@
 
 			&::after {
 				content: '✖';
-				color: #808080;
+				color: #078000;
 			}
+		}
+	}
+
+	.llc-groups {
+		margin: 1em;
+
+		.llc-group {
+			padding: 0.5em;
 		}
 	}
 
@@ -57,7 +64,6 @@
 		border-bottom: 1px dashed #B3B3B3;
 		height: 2em;
 		margin: 0.5em;
-		width: 50em;
 
 		* {
 			float: left;
@@ -67,12 +73,12 @@
 
 		.llc-item-legend {
 			background-color: transparent;
-			border: 2px solid transparent;
-			height: 2em;
+			border: 0.2em solid transparent;
+			height: 1.6em;
 			margin: 0px;
 			margin-right: 0.5em;
 			padding: 0px;
-			width: 2em;
+			width: 1.6em;
 		}
 
 		.llc-item-visibility {
@@ -146,7 +152,7 @@
 
 		&:not(:checked) + label:after {
 			opacity: 0;
-			transform: scale(3);
+			transform: scale(2);
 		}
 	}
 
@@ -156,7 +162,7 @@
 		& + label {
 			cursor: pointer;
 			line-height: 2em;
-			padding-left: 2.5em;
+			padding-left: 3em;
 			position: relative;
 		}
 
@@ -171,19 +177,21 @@
 			border: 2px solid #969696;
 			border-radius: 1em;
 			box-shadow: inset 1px 1px 3px rgba(0.5, 0.5, 0.5, 0.2);
-			height: 1.2em;
-			width: 1.2em;
-			top: 0.25em;
-			left: 0.25em;
+			height: 1.5em;
+			width: 1.5em;
+			top: 0px;
+			left: 0px;
 		}
 
 		&:checked + label:after, &:not(:checked) + label:after {
 			background-color: #078000;
 			border-radius: 1em;
-			height: 0.7em;
-			left: 0.65em;
-			width: 0.7em;
-			top: 0.65em;
+			left: 0px;
+			top: 0px;
+			width: 0.75em;
+			height: 0.75em;
+			margin-left: 0.525em;
+			margin-top: 0.525em;
 			transition: transform .25s, opacity .25s;
 		}
 
@@ -194,7 +202,7 @@
 
 		&:not(:checked) + label:after {
 			opacity: 0;
-			transform: scale(3);
+			transform: scale(2);
 		}
 	}
 
@@ -203,7 +211,6 @@
 	input[type=range] {
 		-webkit-appearance: none;
 		margin: 0px;
-		width: 100%;
 		position: relative;
 	}
 	input[type=range]:focus {

@@ -5,6 +5,10 @@ L.llc.View = L.Class.extend({
 
 	includes: L.Mixin.Events,
 
+	options: {
+
+	},
+
 	initialize: function (map, options) {
 		this._map = map;
 		L.setOptions(this, options);
@@ -22,7 +26,10 @@ L.llc.View = L.Class.extend({
 
 		this._groupsRootEl = L.DomUtil.create('div', 'llc-groups', canvasEl);
 		this._fragments = {
-			layers: new L.llc.Layers(this._groupsRootEl, map)
+			layers: new L.llc.Layers(this._groupsRootEl, map, {
+				showAreas: this.options.showAreas,
+				formatArea: this.options.formatArea
+			})
 		};
 
 		if (this.options.groups) {
@@ -35,9 +42,6 @@ L.llc.View = L.Class.extend({
 			.on(containerEl, 'mousedown', L.DomEvent.stopPropagation)
 			.on(containerEl, 'wheel', L.DomEvent.stopPropagation)
 			.on(closeEl, 'click', this._onCloseClick, this);
-
-		this._layers = {};
-		this._hidedLayers = [];
 	},
 
 	addLayer: function (layer, auto) {
@@ -45,19 +49,8 @@ L.llc.View = L.Class.extend({
 		return this;
 	},
 
-	addLegend: function (legend) {
-		if (!Array.isArray(legend)) {
-
-			this.addLayer(legend.layer);
-
-			var layerInfo = this._layers[L.stamp(legend.layer)];
-
-			L.extend(layerInfo.legendEl.style, legend.style);
-
-		} else {
-			legend.forEach(this.addLegend, this);
-		}
-
+	addLegend: function (layer, legend) {
+		this._fragments.layers.addLegend(layer, legend);
 		return this;
 	},
 
@@ -81,15 +74,7 @@ L.llc.View = L.Class.extend({
 	},
 
 	updateAreas: function () {
-		var layerInfo;
-
-		for (var id in this._layers) {
-			layerInfo = this._layers[id];
-
-			if (layerInfo.areaEl) {
-				layerInfo.areaEl.innerHTML = this.options.formatArea(L.Control.LC.areaOf(layerInfo.layer, true));
-			}
-		}
+		this._fragments.layers.updateAreas();
 	},
 
 	_addGroup: function (group) {

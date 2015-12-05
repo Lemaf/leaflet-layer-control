@@ -182,12 +182,29 @@ L.llc.Layers = L.Class.extend({
 			this._layers[layerID].user = true;
 		}
 
+		if (layer.options.legend) {
+			L.extend(layerInfo.legendEl.style, layer.options.legend);
+		}
+
 		this._layers[layerID].inMap = this._map.hasLayer(layer);
 		if (this._layers[layerID].inMap) {
 			this._layers[layerID].visibilityCheckEl.checked = true;
 		}
 
 		return this;
+	},
+
+	addLegend: function (layer, legend) {
+		var layerInfo = this._layers[L.stamp(layer)];
+
+		if (!layerInfo) {
+			this.addLayer(layer);
+			layerInfo = this._layers[L.stamp(layer)];
+		}
+
+		if (layerInfo) {
+			L.extend(layerInfo.legendEl.style, legend);
+		}
 	},
 
 	hideLayer: function (layer) {
@@ -224,6 +241,19 @@ L.llc.Layers = L.Class.extend({
 			}
 		}
 
+	},
+
+	updateAreas: function () {
+		var layerInfo;
+		if (this.options.showAreas) {
+			for (var layerID in this._layers) {
+				layerInfo = this._layers[layerID];
+
+				if (layerInfo.areaEl) {
+					layerInfo.areaEl.textContent = this.options.formatArea(L.llc.areaOf(layerInfo.layer));
+				}
+			}
+		}
 	},
 
 	_maybeHideGroup: function (group) {
@@ -304,6 +334,10 @@ L.llc.View = L.Class.extend({
 
 	includes: L.Mixin.Events,
 
+	options: {
+
+	},
+
 	initialize: function (map, options) {
 		this._map = map;
 		L.setOptions(this, options);
@@ -321,7 +355,10 @@ L.llc.View = L.Class.extend({
 
 		this._groupsRootEl = L.DomUtil.create('div', 'llc-groups', canvasEl);
 		this._fragments = {
-			layers: new L.llc.Layers(this._groupsRootEl, map)
+			layers: new L.llc.Layers(this._groupsRootEl, map, {
+				showAreas: this.options.showAreas,
+				formatArea: this.options.formatArea
+			})
 		};
 
 		if (this.options.groups) {
@@ -334,9 +371,6 @@ L.llc.View = L.Class.extend({
 			.on(containerEl, 'mousedown', L.DomEvent.stopPropagation)
 			.on(containerEl, 'wheel', L.DomEvent.stopPropagation)
 			.on(closeEl, 'click', this._onCloseClick, this);
-
-		this._layers = {};
-		this._hidedLayers = [];
 	},
 
 	addLayer: function (layer, auto) {
@@ -344,19 +378,8 @@ L.llc.View = L.Class.extend({
 		return this;
 	},
 
-	addLegend: function (legend) {
-		if (!Array.isArray(legend)) {
-
-			this.addLayer(legend.layer);
-
-			var layerInfo = this._layers[L.stamp(legend.layer)];
-
-			L.extend(layerInfo.legendEl.style, legend.style);
-
-		} else {
-			legend.forEach(this.addLegend, this);
-		}
-
+	addLegend: function (layer, legend) {
+		this._fragments.layers.addLegend(layer, legend);
 		return this;
 	},
 
@@ -380,15 +403,7 @@ L.llc.View = L.Class.extend({
 	},
 
 	updateAreas: function () {
-		var layerInfo;
-
-		for (var id in this._layers) {
-			layerInfo = this._layers[id];
-
-			if (layerInfo.areaEl) {
-				layerInfo.areaEl.innerHTML = this.options.formatArea(L.Control.LC.areaOf(layerInfo.layer, true));
-			}
-		}
+		this._fragments.layers.updateAreas();
 	},
 
 	_addGroup: function (group) {
@@ -531,8 +546,8 @@ L.llc.Control = L.Control.extend({
 		return this;
 	},
 
-	addLegend: function (legend) {
-		this._toInvoke('addLegend', legend);
+	addLegend: function (layer, legend) {
+		this._toInvoke('addLegend', layer, legend);
 		return this;
 	},
 

@@ -16,6 +16,19 @@
 			width: 100%;
 		}
 	</style>
+
+	<!-- Custom Style -->
+	<style type="text/css">
+
+		.llc-groups {
+			height: 200px;
+			width: 40em;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
+
+	</style>
+
 	<script type="text/javascript" src="leaflet/dist/leaflet-src.js"></script>
 	<script type="text/javascript" src="web-animations-js/web-animations.min.js"></script>
 	<script type="text/javascript" src="llc.js"></script>
@@ -46,14 +59,22 @@
 			var mctLayer = L.polygon(
 				[[-15.79894868207,-47.870412149013],[-15.79887851051,-47.870345852206],[-15.79908264588,-47.86971603253],[-15.79923255766,-47.869706088012],[-15.80032340174,-47.870064090773],[-15.80011607802,-47.870790040817],[-15.79894868207,-47.870412149013]], {
 					group: 'Brazil Ministries',
-					title: 'MCT'
+					title: 'MCT',
+					legend: {
+						borderColor: '#B5FF00',
+						backgroundColor: '#FFA200'
+					}
 				}
 			);
 
 			var mecLayer = L.polygon(
 				[[-15.79550,-47.87382],[-15.79519,-47.87373],[-15.79516,-47.87369],[-15.79522,-47.87369],[-15.79533,-47.87338],[-15.79450,-47.87308],[-15.79439,-47.87346],[-15.79436,-47.87347],[-15.79428,-47.87344],[-15.79451,-47.87266],[-15.79457,-47.87266],[-15.79568,-47.87308],[-15.79572,-47.87314],[-15.79550,-47.87382]], {
 					group: 'Brazil Ministries',
-					title: 'MEC'
+					title: 'MEC',
+					legend: {
+						borderColor: '#078900',
+						borderStyle: 'dashed'
+					}
 				}
 			).addTo(map);
 
@@ -78,21 +99,14 @@
 				}
 			});
 
-			// layerControl.addLegend([
-			// 	{
-			// 		layer: mctLayer,
-			// 		style: {
-			// 			border: '1px solid #0f0',
-			// 			background: 'none'
-			// 		}
-			// 	}
-			// ]);
-
 			layerControl
 				.addLayer(baseLayer2)
 				.addLayer(mctLayer)
 				.addLayer(mecLayer)
 				.hideLayer(neverShow)
+				.addLegend(baseLayer1, {
+					borderColor: '#1B58DC'
+				})
 				.updateAreas();
 
 			map.addControl(layerControl);
