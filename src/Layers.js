@@ -32,6 +32,7 @@ L.llc.Layers = L.Class.extend({
 		var groupInfo = this._groups[group.name] = {
 			name: group.name,
 			unique: !!group.unique,
+			withOpacity: !group.noOpacity,
 			el: L.DomUtil.create('ul', 'llc-group', this._rootEl)
 		};
 
@@ -100,7 +101,7 @@ L.llc.Layers = L.Class.extend({
 			L.DomEvent
 				.on(visibilityCheckEl, 'click', this._onVisibilityClick, this);
 
-			if (layer.setOpacity) {
+			if (group.withOpacity && layer.setOpacity) {
 				var opacityEl = L.DomUtil.create('input', 'llc-item-opacity', liEl);
 				opacityEl.type = 'range';
 				opacityEl.min = 0;
