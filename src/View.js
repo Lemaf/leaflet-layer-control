@@ -83,11 +83,6 @@ L.llc.View = L.Class.extend({
 
 	_close: function () {
 
-		// TODO: Anim
-		
-		// this._containerEl.parentNode.removeChild(this._containerEl);
-		// this._fromEl.style.display = 'block';
-
 		var containerEl = this._containerEl,
 		    fromEl = this._fromEl,
 		    canvasEl = this._canvasEl;
@@ -150,9 +145,6 @@ L.llc.View = L.Class.extend({
 
 	_onLayerRemove: function (evt) {
 		this.removeLayer(evt.layer);
-	},
-
-	_onItemClick: function () {
 	},
 
 	_show: function (fromEl, position) {

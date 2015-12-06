@@ -421,11 +421,6 @@ L.llc.View = L.Class.extend({
 
 	_close: function () {
 
-		// TODO: Anim
-		
-		// this._containerEl.parentNode.removeChild(this._containerEl);
-		// this._fromEl.style.display = 'block';
-
 		var containerEl = this._containerEl,
 		    fromEl = this._fromEl,
 		    canvasEl = this._canvasEl;
@@ -488,9 +483,6 @@ L.llc.View = L.Class.extend({
 
 	_onLayerRemove: function (evt) {
 		this.removeLayer(evt.layer);
-	},
-
-	_onItemClick: function () {
 	},
 
 	_show: function (fromEl, position) {
@@ -590,10 +582,10 @@ L.llc.Control = L.Control.extend({
 			showAreas: true,
 
 			formatArea: function (area) {
-				if (area >= 1000) {
+				if (area >= 1e3) {
 					return L.Util.formatNum(area / 1e4, 4) + 'ha';
 				} else {
-					return L.Util.formatNum(area, 4) + 'm';
+					return L.Util.formatNum(area, 4) + 'm²';
 				}
 			},
 

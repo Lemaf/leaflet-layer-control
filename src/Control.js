@@ -14,10 +14,10 @@ L.llc.Control = L.Control.extend({
 			showAreas: true,
 
 			formatArea: function (area) {
-				if (area >= 1000) {
+				if (area >= 1e3) {
 					return L.Util.formatNum(area / 1e4, 4) + 'ha';
 				} else {
-					return L.Util.formatNum(area, 4) + 'm';
+					return L.Util.formatNum(area, 4) + 'm²';
 				}
 			},
 
