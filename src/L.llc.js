@@ -16,6 +16,7 @@ L.llc = {
 		var area = 0, latlng1, latlng2;
 
 		if (latlngs.length > 2) {
+
 			for (var i = 0; i < latlngs.length; i++) {
 				latlng1 = latlngs[i];
 				latlng2 = latlngs[(i + 1) % latlngs.length];
@@ -26,18 +27,21 @@ L.llc = {
 			area *= R;
 		}
 
-		return area;
+		return Math.abs(area);
 	}
 
 
 	L.llc.areaOf = function (layer) {
 		var area = 0;
+
 		if (layer instanceof L.FeatureGroup) {
 
 			layer.eachLayer(function (layer) {
-				area += L.llc.Control.areaOf(layer);
+				area += L.llc.areaOf(layer);
 			});
+
 		} else if (layer instanceof L.Polygon) {
+
 			var latlngs = layer.getLatLngs();
 
 			if (Array.isArray(latlngs[0])) {
@@ -46,8 +50,11 @@ L.llc = {
 				latlngs.slice(0).forEach(function (latlngs) {
 					area -= areaOf(latlngs);
 				});
+
 			} else {
+
 				area = areaOf(latlngs);
+
 			}
 		}
 

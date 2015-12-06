@@ -16,6 +16,7 @@ L.llc = {
 		var area = 0, latlng1, latlng2;
 
 		if (latlngs.length > 2) {
+
 			for (var i = 0; i < latlngs.length; i++) {
 				latlng1 = latlngs[i];
 				latlng2 = latlngs[(i + 1) % latlngs.length];
@@ -26,18 +27,21 @@ L.llc = {
 			area *= R;
 		}
 
-		return area;
+		return Math.abs(area);
 	}
 
 
 	L.llc.areaOf = function (layer) {
 		var area = 0;
+
 		if (layer instanceof L.FeatureGroup) {
 
 			layer.eachLayer(function (layer) {
-				area += L.llc.Control.areaOf(layer);
+				area += L.llc.areaOf(layer);
 			});
+
 		} else if (layer instanceof L.Polygon) {
+
 			var latlngs = layer.getLatLngs();
 
 			if (Array.isArray(latlngs[0])) {
@@ -46,8 +50,11 @@ L.llc = {
 				latlngs.slice(0).forEach(function (latlngs) {
 					area -= areaOf(latlngs);
 				});
+
 			} else {
+
 				area = areaOf(latlngs);
+
 			}
 		}
 
@@ -188,10 +195,8 @@ L.llc.Layers = L.Class.extend({
 			L.extend(layerInfo.legendEl.style, layer.options.legend);
 		}
 
-		this._layers[layerID].inMap = this._map.hasLayer(layer);
-		if (this._layers[layerID].inMap) {
-			this._layers[layerID].visibilityCheckEl.checked = true;
-		}
+		layerInfo.inMap = this._map.hasLayer(layer);
+		layerInfo.visibilityCheckEl.checked = layerInfo.inMap;
 
 		return this;
 	},
@@ -234,8 +239,8 @@ L.llc.Layers = L.Class.extend({
 
 		if (layerInfo) {
 
-			delete layerInfo.inMap;
-			layerInfo.visibilityCheckEl.checkbox = !!layerInfo.inMap;
+			layerInfo.inMap = this._map.hasLayer(layer);
+			layerInfo.visibilityCheckEl.checkbox = layerInfo.inMap;
 
 			if (!auto) {
 				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);

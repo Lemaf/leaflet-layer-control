@@ -130,10 +130,8 @@ L.llc.Layers = L.Class.extend({
 			L.extend(layerInfo.legendEl.style, layer.options.legend);
 		}
 
-		this._layers[layerID].inMap = this._map.hasLayer(layer);
-		if (this._layers[layerID].inMap) {
-			this._layers[layerID].visibilityCheckEl.checked = true;
-		}
+		layerInfo.inMap = this._map.hasLayer(layer);
+		layerInfo.visibilityCheckEl.checked = layerInfo.inMap;
 
 		return this;
 	},
@@ -176,8 +174,8 @@ L.llc.Layers = L.Class.extend({
 
 		if (layerInfo) {
 
-			delete layerInfo.inMap;
-			layerInfo.visibilityCheckEl.checkbox = !!layerInfo.inMap;
+			layerInfo.inMap = this._map.hasLayer(layer);
+			layerInfo.visibilityCheckEl.checkbox = layerInfo.inMap;
 
 			if (!auto) {
 				layerInfo.liEl.parentNode.removeChild(layerInfo.liEl);
