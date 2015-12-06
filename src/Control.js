@@ -21,7 +21,9 @@ L.llc.Control = L.Control.extend({
 				}
 			},
 
-			groups: []
+			groups: [],
+
+			defaultGroup: null
 		},
 		parentElement: null
 	},

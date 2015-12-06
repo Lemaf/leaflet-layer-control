@@ -56,13 +56,17 @@ L.llc.Layers = L.Class.extend({
 
 		if (!layerInfo) {
 
+			var group = this._getGroup(layer.options.group);
+
+			if (!group) {
+				return this;
+			}
+
 			layerInfo = this._layers[layerID] = {
 				layer: layer
 			};
 
 			var showLayer = this._hidedLayers.indexOf(layerID) === -1;
-
-			var group = this._getGroup(layer.options.group);
 
 			if (!showLayer) {
 				this._maybeHideGroup(group);
@@ -208,9 +212,7 @@ L.llc.Layers = L.Class.extend({
 		var group = this._groups[groupName];
 
 		if (!group) {
-			// TODO: What?
-			this._addGroup({name: 'default'});
-			group = this._groups['default'];
+			group = this._groups[this.options.defaultGroup];
 		}
 
 		return group;
