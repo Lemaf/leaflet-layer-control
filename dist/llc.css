@@ -53,6 +53,9 @@
 .llc-container .llc-groups .llc-group {
   padding: 0.5em;
 }
+.llc-container .llc-groups .llc-subgroup {
+  margin-left: 2em;
+}
 .llc-container .llc-item {
   border-bottom: 1px dashed #B3B3B3;
   height: 2em;

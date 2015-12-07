@@ -94,17 +94,39 @@ L.llc.Layers = L.Class.extend({
 			return;
 		}
 
+		var parentElement, isSubGroup = false, superGroup;
+
+		if (group.superGroup && (superGroup = this._groups[group.superGroup])) {
+
+			if (!superGroup.subGroupRootEl) {
+				superGroup.subGroupRootEl = L.DomUtil.create('div', 'llc-subgroups');
+
+				if (superGroup.el.nextSibling) {
+					superGroup.el.parentNode.insertBefore(superGroup.subGroupRootEl, superGroup.el.nextSibling);
+				} else {
+					superGroup.el.parentNode.appendChild(superGroup.subGroupRootEl);
+				}
+			}
+
+			parentElement = superGroup.subGroupRootEl;
+
+			isSubGroup = true;
+
+		} else {
+			parentElement = this._rootEl;
+		}
+
 		var groupInfo = this._groups[group.name] = {
 			name: group.name,
 			unique: !!group.unique,
 			withOpacity: !group.noOpacity,
-			el: L.DomUtil.create('ul', 'llc-group', this._rootEl)
+			el: L.DomUtil.create('ul', isSubGroup ? 'llc-subgroup' :  'llc-group', parentElement)
 		};
 
 		this._groupsOrder.push(groupInfo);
 
 		var li = L.DomUtil.create('li', 'llc-group-title', groupInfo.el);
-		var spanTitle = L.DomUtil.create('span', null, li);
+		var spanTitle = L.DomUtil.create('span', '', li);
 		spanTitle.innerHTML = group.name;
 
 		return this;

@@ -98,9 +98,58 @@
 						name: 'Brazil Secrets'
 					}, {
 						name: 'Brazil Ministries'
+					}, {
+						name: 'Group 1'
+					}, {
+						name: 'Group 2'
+					}, {
+						name: 'Group 1.1',
+						superGroup: 'Group 1'
+					}, {
+						name: 'Group 2.1',
+						superGroup: 'Group 2'
+					}, {
+						name: 'Group 2.1.1',
+						superGroup: 'Group 2.1'
+					}, {
+						name: 'Group 1.2',
+						superGroup: 'Group 1'
 					}]
 				}
 			});
+
+			var l1 = L.polygon([], {
+				group: 'Group 1',
+				title: 'Layer #1 in Group 1'
+			}).addTo(map);
+
+			var l11 = L.polygon(
+				[], {
+					group: 'Group 1.1',
+					title: 'Layer #1 in Group 1.1'
+				}
+			).addTo(map);
+
+			var l211 = L.polygon(
+				[], {
+					group: 'Group 2.1.1',
+					title: 'Layer #1 in Group 2.1.1'
+			}).addTo(map);
+
+			var l21 = L.polygon([], {
+				group: 'Group 2.1',
+				title: 'Layer #1 in Group 2.1'
+			}).addTo(map);
+
+			var l2 = L.polygon([], {
+				group: 'Group 2',
+				title: 'Layer #1 in Group 2'
+			}).addTo(map);
+
+			var l12 = L.polygon([], {
+				group: 'Group 1.2',
+				title: 'Layer #1 in Group 1.2'
+			}).addTo(map);
 
 			layerControl
 				.addLayer(baseLayer2)
