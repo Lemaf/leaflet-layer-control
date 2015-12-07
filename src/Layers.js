@@ -33,17 +33,17 @@ L.llc.Layers = L.Class.extend({
 
 		if (group.superGroup && (superGroup = this._groups[group.superGroup])) {
 
-			if (!superGroup.subGroupRootEl) {
-				superGroup.subGroupRootEl = L.DomUtil.create('div', 'llc-subgroups');
+			if (!superGroup.subRootEl) {
+				superGroup.subRootEl = L.DomUtil.create('div', 'llc-subgroups');
 
 				if (superGroup.el.nextSibling) {
-					superGroup.el.parentNode.insertBefore(superGroup.subGroupRootEl, superGroup.el.nextSibling);
+					superGroup.el.parentNode.insertBefore(superGroup.subRootEl, superGroup.el.nextSibling);
 				} else {
-					superGroup.el.parentNode.appendChild(superGroup.subGroupRootEl);
+					superGroup.el.parentNode.appendChild(superGroup.subRootEl);
 				}
 			}
 
-			parentElement = superGroup.subGroupRootEl;
+			parentElement = superGroup.subRootEl;
 
 			isSubGroup = true;
 
