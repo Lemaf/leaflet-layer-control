@@ -208,7 +208,6 @@ L.llc.Layers = L.Class.extend({
 				delete this._layers[layerID];
 			}
 		}
-
 	},
 
 	updateAreas: function () {
