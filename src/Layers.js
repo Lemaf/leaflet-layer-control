@@ -223,12 +223,6 @@ L.llc.Layers = L.Class.extend({
 		}
 	},
 
-	_maybeHideGroup: function (group) {
-		if (!group.showAlways && group.el.childNodes.length === 1) {
-			group.el.parentNode.removeChild(group.el);
-		}
-	},
-
 	_getGroup: function (groupName) {
 		var group = this._groups[groupName];
 
@@ -237,6 +231,12 @@ L.llc.Layers = L.Class.extend({
 		}
 
 		return group;
+	},
+
+	_maybeHideGroup: function (group) {
+		if (!group.showAlways && group.el.childNodes.length === 1) {
+			group.el.parentNode.removeChild(group.el);
+		}
 	},
 
 	_onLayerAdd: function (evt) {
