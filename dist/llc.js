@@ -370,7 +370,7 @@ L.llc.View = L.Class.extend({
 
 	initialize: function (map, options) {
 		this._map = map;
-		L.setOptions(this, options);
+		L.setOptions(this, options.layers);
 
 		var containerEl = this._containerEl = L.DomUtil.create('div', 'llc-container');
 
@@ -381,9 +381,26 @@ L.llc.View = L.Class.extend({
 		var canvasEl = this._canvasEl = L.DomUtil.create('div', 'llc-canvas', containerEl);
 
 		var headerEl = this._headerEl = L.DomUtil.create('div', 'llc-header', canvasEl);
-		var closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close', headerEl);
+
+		var titleEl = this._titleEl = L.DomUtil.create('div', 'llc-title', headerEl);
+
+		var spanTitle = L.DomUtil.create('span', '', titleEl);
+		spanTitle.innerHTML = options.llcTitle ? options.llcTitle:'';
 
 		this._groupsRootEl = L.DomUtil.create('div', 'llc-groups', canvasEl);
+		var footerEl = this._footerEl = L.DomUtil.create('div', 'llc-footer', canvasEl);
+		var closeEl;
+
+		if (options.position.indexOf('bottomright') === 0) {
+			closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close-right', footerEl);
+		} else if (options.position.indexOf('topright') === 0) {
+			closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close-right', headerEl);
+		} else if (options.position.indexOf('bottomleft') === 0) {
+			closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close-left', footerEl);
+		} else if (options.position.indexOf('topleft') === 0) {
+			closeEl = this._closeEl = L.DomUtil.create('div', 'llc-close-left', headerEl);
+		}			
+
 		this._fragments = {
 			layers: new L.llc.Layers(this._groupsRootEl, map, {
 				showAreas: this.options.showAreas,
@@ -648,7 +665,7 @@ L.llc.Control = L.Control.extend({
 	},
 
 	onAdd: function (map) {
-		this._viewLayers = L.llc.view(map, this.options.layers);
+		this._viewLayers = L.llc.view(map, this.options);
 
 		var button = L.DomUtil.create('div', 'llc llc-button');
 

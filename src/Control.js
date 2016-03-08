@@ -59,7 +59,7 @@ L.llc.Control = L.Control.extend({
 	},
 
 	onAdd: function (map) {
-		this._viewLayers = L.llc.view(map, this.options.layers);
+		this._viewLayers = L.llc.view(map, this.options);
 
 		var button = L.DomUtil.create('div', 'llc llc-button');
 
