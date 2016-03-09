@@ -136,11 +136,6 @@
 .llc-container .llc-item .llc-item-opacity:checked + label {
   background-color: #000;
 }
-.llc-container .llc-group-title {
-  border-bottom: 1px solid #BDBDBD;
-  font-weight: bold;
-  margin-bottom: 1em;
-}
 .llc-container input + label {
   -webkit-touch-callout: none;
   -webkit-user-select: none;

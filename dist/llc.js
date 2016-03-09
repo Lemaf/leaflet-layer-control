@@ -162,16 +162,25 @@ L.llc.Layers = L.Class.extend({
 			var liEl = L.DomUtil.create('li', 'llc-item', showLayer && group.el);
 
 			var legendEl = L.DomUtil.create('div', 'llc-item-legend', liEl);
-
 			var visibilityCheckEl = L.DomUtil.create('input', 'llc-item-visibility', liEl);
 			var labelVisibilityEl = L.DomUtil.create('label', 'llc-item-opacity-label', liEl);
+
 			visibilityCheckEl.id = 'llc-' + L.stamp(visibilityCheckEl);
 			labelVisibilityEl.setAttribute('for', visibilityCheckEl.id);
 
 			// var span = L.DomUtil.create('span', 'llc-item-title', liEl);
 			// span.innerHTML = layer.options.title;
+
+			var truncadeTitle;
+			if(layer.options.title.length >= 45) {
+				truncadeTitle = layer.options.title
+					.substring(0,42).concat('...');
+			} else {
+				truncadeTitle = layer.options.title;
+			}
 			
-			labelVisibilityEl.innerHTML = layer.options.title;
+			labelVisibilityEl.innerHTML = truncadeTitle;
+			labelVisibilityEl.title = layer.options.title;
 
 			liEl._layerID = layerID;
 			layerInfo.group = group;
