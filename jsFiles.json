@@ -1,5 +1,6 @@
 [
 	"L.llc.js",
 	"Control.js",
-	"ext/L.Path.setOpacity.js"
+	"ext/L.Path.setOpacity.js",
+	"ext/L.FeatureGroup.js"
 ]

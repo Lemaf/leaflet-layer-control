@@ -1,6 +1,6 @@
 {
   "name": "leaflet-layer-control",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "homepage": "https://github.com/Lemaf/leaflet-layer-control",
   "description": "Leaflet Layer Control",
   "main": "dist/leaflet-layer-control.js",
@@ -13,7 +13,8 @@
     "control"
   ],
   "authors": [
-    "rthoth <ronaldo.silva@lemaf.ufla.br>"
+    "rthoth <ronaldo.silva@lemaf.ufla.br>",
+    "sheldon <julio.diniz@lemaf.ufla.br>"
   ],
   "license": "MIT",
   "ignore": [
