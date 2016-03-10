@@ -226,7 +226,7 @@ L.llc.Layers = L.Class.extend({
 				layerInfo = this._layers[layerID];
 
 				if (layerInfo.areaEl) {
-					layerInfo.areaEl.textContent = this.options.formatArea(L.llc.areaOf(layerInfo.layer));
+					layerInfo.areaEl.textContent = this.options.formatArea(this.options.areaOf(layerInfo.layer));
 				}
 			}
 		}

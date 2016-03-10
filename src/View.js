@@ -45,7 +45,8 @@ L.llc.View = L.Class.extend({
 		this._fragments = {
 			layers: new L.llc.Layers(this._groupsRootEl, map, {
 				showAreas: this.options.showAreas,
-				formatArea: this.options.formatArea
+				formatArea: this.options.formatArea,
+				areaOf: this.options.areaOf
 			})
 		};
 

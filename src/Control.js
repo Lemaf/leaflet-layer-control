@@ -21,6 +21,8 @@ L.llc.Control = L.Control.extend({
 				}
 			},
 
+			areaOf: L.llc.areaOf,
+
 			groups: [],
 
 			defaultGroup: null

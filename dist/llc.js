@@ -291,7 +291,7 @@ L.llc.Layers = L.Class.extend({
 				layerInfo = this._layers[layerID];
 
 				if (layerInfo.areaEl) {
-					layerInfo.areaEl.textContent = this.options.formatArea(L.llc.areaOf(layerInfo.layer));
+					layerInfo.areaEl.textContent = this.options.formatArea(this.options.areaOf(layerInfo.layer));
 				}
 			}
 		}
@@ -413,7 +413,8 @@ L.llc.View = L.Class.extend({
 		this._fragments = {
 			layers: new L.llc.Layers(this._groupsRootEl, map, {
 				showAreas: this.options.showAreas,
-				formatArea: this.options.formatArea
+				formatArea: this.options.formatArea,
+				areaOf: this.options.areaOf
 			})
 		};
 
@@ -635,6 +636,8 @@ L.llc.Control = L.Control.extend({
 					return L.Util.formatNum(area, 4) + 'm²';
 				}
 			},
+
+			areaOf: L.llc.areaOf,
 
 			groups: [],
 
