@@ -136,7 +136,7 @@ L.llc.Layers = L.Class.extend({
 			L.DomEvent
 				.on(visibilityCheckEl, 'click', this._onVisibilityClick, this);
 
-			if (group.withOpacity && layer.setOpacity) {
+			if (group.withOpacity) {
 				var opacityEl = L.DomUtil.create('input', 'llc-item-opacity', liEl);
 				opacityEl.type = 'range';
 				opacityEl.min = 0;
@@ -261,7 +261,7 @@ L.llc.Layers = L.Class.extend({
 		var layerInfo = this._layers[event.currentTarget._layerID];
 
 		if (layerInfo) {
-			layerInfo.layer.setOpacity(opacity);
+			layerInfo.layer.setStyle({opacity: opacity, fillOpacity: opacity});
 		}
 	},
 

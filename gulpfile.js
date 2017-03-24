@@ -57,7 +57,7 @@ gulp.task('serve', ['uglify:javascript', 'less'], function () {
 
 	connect.server({
 		root: ['demo', 'dist', 'bower_components'],
-		port: 9010
+		port: 9011
 	});
 });
 

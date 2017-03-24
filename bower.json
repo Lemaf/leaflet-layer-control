@@ -26,7 +26,7 @@
     "src"
   ],
   "dependencies": {
-    "leaflet": "~0.7.7",
+    "leaflet": "~1.0.3",
     "web-animations-js": "~2.1.4"
   }
 }

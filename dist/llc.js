@@ -5,7 +5,7 @@ L.llc = {
 
 (function () {
 
-	var D2R = L.LatLng.DEG_TO_RAD,
+	var D2R = Math.PI / 180,
 		R_MAJOR = 6378137,
 		R_MINOR = 6356752;
 
@@ -47,7 +47,7 @@ L.llc = {
 			if (Array.isArray(latlngs[0])) {
 				// shell and holes
 				area += areaOf(latlngs[0]);
-				latlngs.slice(0).forEach(function (latlngs) {
+				latlngs.slice(1).forEach(function (latlngs) {
 					area -= areaOf(latlngs);
 				});
 
@@ -201,7 +201,7 @@ L.llc.Layers = L.Class.extend({
 			L.DomEvent
 				.on(visibilityCheckEl, 'click', this._onVisibilityClick, this);
 
-			if (group.withOpacity && layer.setOpacity) {
+			if (group.withOpacity) {
 				var opacityEl = L.DomUtil.create('input', 'llc-item-opacity', liEl);
 				opacityEl.type = 'range';
 				opacityEl.min = 0;
@@ -326,7 +326,7 @@ L.llc.Layers = L.Class.extend({
 		var layerInfo = this._layers[event.currentTarget._layerID];
 
 		if (layerInfo) {
-			layerInfo.layer.setOpacity(opacity);
+			layerInfo.layer.setStyle({opacity: opacity, fillOpacity: opacity});
 		}
 	},
 
