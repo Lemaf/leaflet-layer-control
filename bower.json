@@ -1,6 +1,6 @@
 {
   "name": "leaflet-layer-control",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "homepage": "https://github.com/Lemaf/leaflet-layer-control",
   "description": "Leaflet Layer Control",
   "main": "dist/leaflet-layer-control.js",

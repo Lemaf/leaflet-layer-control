@@ -1,6 +1,6 @@
 {
   "name": "leaflet-layer-control",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Leaflet layer control",
   "main": "dist/leaflet-layer-control.js",
   "scripts": {
